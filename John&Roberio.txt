@@ -1,0 +1,623 @@
+--Sistema: Vendas de Perfumes---
+
+
+
+create table usuario(
+ idUsuario int primary key,
+	NomeUsuario varchar (70),
+	login varchar (50),
+	senha varchar (40),
+	cargo varchar(50),
+	sexo char (1)	
+);
+create table Nivel_acesso(
+idNivelacesso int primary key,
+	idUsuario int,
+	Tipodeusuario varchar (50),
+	foreign key (idUsuario) references usuario(idUsuario)
+);
+create table Fornecedor(
+idfornecedor int primary key,
+	razaoSocial varchar(100),
+	nomefantasia varchar(100),
+	CNPJ varchar (50)
+);
+create table contato_fornecedor(
+idcontatofornecedor int primary key,
+	idfornecedor int,
+	telefone_fornecedor varchar(80),
+	WhatsappFornecedor varchar(30),
+	Email_fornecedor varchar(40),
+	foreign key (idfornecedor) references fornecedor (idfornecedor)
+);
+
+create table Entrada(
+identrada int primary key,
+	idUsuario int,
+	idfornecedor int,
+	valortotaldanota decimal(7,2),
+	datacompra date,
+	foreign key (idUsuario) references usuario (idUsuario),
+	foreign key (idfornecedor) references fornecedor (idfornecedor)	
+);
+create table Marca(
+idmarca int  primary key,
+	nomeMarca varchar (120)
+);
+create table categoria(
+idcategoria int  primary key,
+	Nome_Categoria varchar (100)
+);
+
+create table Prateleira(
+idprateleira int primary key,
+	idcategoria int,
+	descricaoPrateleira varchar(80),
+	quantidadeFrascos int,
+	foreign key (idcategoria) references categoria (idcategoria)
+);
+
+create table produto(
+idproduto int  primary key,
+	NomeDoProduto varchar (80),
+	idmarca int,
+	idcategoria int,
+	icms numeric(7,2),
+	ipi numeric(7,2),
+	Frete numeric(7,2),
+	valornaFabrica numeric(7,2),
+	valordecompra numeric(7,2),
+	lucro numeric(7,2),
+	valorvenda numeric(7,2),
+	desconto numeric(7,2),
+	quantidade numeric(7,2),	
+	foreign key (idcategoria) references categoria (idcategoria),
+	foreign key (idmarca) references marca (idmarca)	
+);
+create table itensentrada(
+iditensentrada int primary key,
+	identrada int,
+	idproduto int,
+	Precocompra numeric(7,2),
+	quantidadeitensentrada numeric (7,2),
+	Unidade char(2),
+	ipi numeric(7,2),
+	frete_ItensEntrada numeric(7,2),
+	icms numeric (7,2),
+	foreign key (idproduto) references produto(idproduto),
+	foreign key (identrada) references entrada (identrada)
+);
+
+create table cliente(
+idcliente int primary key,
+	NomeCliente varchar(100),
+	cpfcliente varchar(20),
+	RGcliente char (20),
+	sexocliente char(1),
+	dataNascimento date,
+	debito numeric(7,2)
+);
+
+
+create table Venda(
+idvenda int  primary key,
+	idUsuario int,
+	idcliente int,
+	dataVenda date,
+	qntparcelas int,
+	prazo varchar(40),
+	descontototal numeric(7,2),
+	descontoacerto numeric(7,2),
+	status varchar(40),
+	valortotal numeric(7,2),
+	foreign key (idUsuario) references usuario (idUsuario),
+	foreign key (idcliente) references cliente (idcliente)
+);
+
+create table itens_vendas(
+iditensvendas int  primary key,
+	idvenda int,
+	idProduto int,
+	quantidade numeric(7,2),
+	Valorvenda float,
+	desconto numeric(7,2),
+	foreign key (idvenda) references venda (idvenda),
+	foreign key (idProduto) references produto (idproduto)
+);
+
+create table contato_cliente(
+idcontatocliente int primary key,
+	idcliente int,
+	telefone varchar(40),
+	Email varchar(50),	
+	Whatsapp varchar(40),
+	foreign key (idcliente) references cliente (idcliente)
+);
+
+create table Endereco_cliente(
+idEndereco_cliente int primary key,
+	idcliente int,
+	Cidade varchar(100),
+	Estado varchar(100),
+	Bairro varchar(100),
+	Rua varchar (100),
+	Numero int,
+	CEP varchar(40),
+	foreign key(idcliente) references cliente(idcliente)
+);
+Create table Parcelas(
+idparcelas serial primary key,
+	idvenda int,
+	numerodeparcelas int,
+	valorparcela numeric(7,2),
+	status varchar (40),
+	vencimento date,
+	foreign key(idvenda) references venda(idvenda)
+);
+create table Forma_de_pagamento(
+idForma_de_pagamento int primary key,
+	tipo_pagamento varchar(50)
+);
+
+create table Pagamento(
+ idPagamento int primary key,
+	idvenda int,
+	idparcelas int,
+	idForma_de_pagamento int,
+	valor_pagamento decimal(7,2),
+	data_pagamento date,	
+	foreign key (idvenda) references venda (idvenda),
+	foreign key (idparcelas) references parcelas (idparcelas),
+	foreign key (idForma_de_pagamento) references Forma_de_pagamento(idForma_de_pagamento)
+);
+create table Devolucao (
+	idDevolucao int primary key,
+	idvenda int,
+	quantidadedevolvida numeric(7,2),
+	dataDevolucao date,
+	descricaodadevolucao varchar (70),
+	foreign key (idvenda) references venda(idvenda)
+);
+create table itensDevolucao(
+iditensDevolucao int primary key,
+	idDevolucao int,
+	idproduto int,
+	quantidade_Devolvida int,
+	datadevolvida date,
+	foreign key (idDevolucao) references Devolucao (idDevolucao),
+	foreign key (idproduto) references produto (idproduto)
+);
+
+create table Troca(
+idtroca int primary key,
+	idvenda int,
+	dataDaTroca date,
+	foreign key (idvenda) references venda (idvenda)
+);
+
+create table itens_troca(
+iditenstroca int primary key,
+	idtroca int,
+	idproduto int,
+	qntTrocada int,
+	foreign key (idtroca) references troca (idtroca),
+	foreign key (idproduto) references produto (idproduto)
+);
+
+
+create function inserindo_itensentrada()
+returns trigger
+as $$
+	begin
+		update produto set quantidade= quantidade+new.quantidadeitensentrada,
+		icms = new.icms,
+		ipi = new.ipi,
+		frete = new.frete_itensentrada,
+		valornafabrica = new.precocompra,
+		valordecompra = new.precocompra + new.icms + new.ipi + new.frete_itensentrada,
+		valorvenda = (new.precocompra + new.icms + new.ipi + new.frete_itensentrada) + ((new.precocompra + new.icms + new.ipi + new.frete_itensentrada)*0.4),
+		desconto = 10
+		where idproduto= new.idproduto;
+		return null;
+	end;
+$$ language plpgsql;
+
+create trigger atualiza_produto
+after insert on itensentrada
+for each row
+execute procedure inserindo_itensentrada();
+---------------------------------------------------------------------------------------------------
+CREATE FUNCTION deletar_itensentrada() RETURNS TRIGGER AS $$
+BEGIN
+update produto set quantidade= (quantidade-old.quantidadeitensentrada),
+		icms =(icms- old.icms),
+		ipi = (ipi-old.ipi),
+		frete = (frete-old.frete_itensentrada),
+		valornafabrica = (valornafabrica-old.precocompra),
+		valordecompra = (valordecompra-old.precocompra - old.icms - old.ipi - old.frete_itensentrada),
+		valorvenda = (old.precocompra + old.icms + old.ipi + old.frete_itensentrada) - (old.precocompra+old.icms + old.ipi + old.frete_itensentrada),
+		desconto =(desconto- 10)
+		where idproduto= old.idproduto;
+RETURN NULL;
+END;
+$$ language plpgsql;
+
+create trigger Excluindo_produto
+after delete on itensentrada
+for each row
+execute procedure deletar_itensentrada();
+
+---------------------------------------------------------------------------------------------------
+create function update_itensentrada()
+returns trigger as $$
+begin
+update produto set quantidade= quantidade-new.quantidadeitensentrada where idproduto= new.idproduto;
+--update produto set quantidade= quantidade+old.quantidadeitens where idproduto=old.idproduto;
+return null;
+end;
+$$ language plpgsql;
+
+create trigger update_produto
+after update on itensentrada
+for each row
+execute procedure update_itensentrada();
+-------------------------------------------------------------------------------------------------
+CREATE FUNCTION inserto_itensvenda() 
+RETURNS TRIGGER AS $$
+BEGIN
+UPDATE produto SET quantidade = quantidade-new.quantidade where idproduto = new.idproduto;
+update venda set valortotal= new.quantidade* new.valorvenda where idvenda=new.idvenda;
+RETURN NULL;
+END;
+$$ language plpgsql;
+ 
+ create trigger inserido_produto
+ after insert on itens_vendas
+ for each row
+ execute procedure inserto_itensvenda();
+-------------------------------------------------------------------------------
+CREATE FUNCTION excluir_produto_itensvenda() RETURNS TRIGGER AS $$
+BEGIN
+UPDATE produto SET quantidade = quantidade+old.quantidade where idproduto = old.idproduto;
+RETURN NULL;
+END;
+$$ language plpgsql;
+
+create trigger excluindo_produto
+after delete on itens_vendas
+for each row
+execute procedure excluir_produto_itensvenda(); 
+-------------------------------------------------------------------------------
+CREATE FUNCTION update_itensvenda() 
+ RETURNS TRIGGER AS $$
+BEGIN
+update produto set quantidade = quantidade-new.quantidade where idproduto = new.idproduto;
+
+RETURN null;
+END;
+ $$ language plpgsql;
+ 
+ create trigger upd_produto
+ after update on itens_vendas
+ for each row
+ execute procedure update_itensvenda();
+
+-----------------------------------------------------------------------------
+create function insert_venda()
+returns trigger as $$
+begin
+update venda set valortotal=  (new.quantidade*new.valorvenda) - new.desconto
+where idvenda=new.idvenda;
+RETURN NULL;
+END;
+$$ language plpgsql;
+
+create trigger inseriu_produto
+after insert on itens_vendas
+for each row
+execute procedure insert_venda();
+-----------------------------------------------------------------------------
+
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values(1,'Roberio','234.657.980-34','23.400.758-61','M','1990/02/14',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values(2,'John','232.085.790-34','23.400.758-61','M','1999/02/10',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values(3, 'Matheus Pereira','097.265.798.-34','23.400.758-61','M','2000/01/15',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values (4,'Jefferson Moraes','123.897.345-45','18.345.237-56','M','2004/04/18',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values (5,'Artur Cardoso','098.677.356-45','23.365.838-55','M','1960/04/12',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values (6,'Cleidiane','253.897.288-45','28.345.237-56','F','1980/11/27',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values (7,'Aline Souza','444.087.565-45','45.390.229-34','F','1995/07/02',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values (8,'Danilo Gomes','321.990.102-21','30.342.093-78','M','2002/06/11',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values (9,'Vera Lúcia','788.234.786-05','28.398.089-98','F','1980/02/28',0.00);
+insert into cliente(idcliente,nomecliente,cpfcliente,rgcliente,sexocliente,datanascimento,debito)
+			values  (10,'Roseli Veiga','786.988.253-85','32.939.328-22','F','1988/09/09',0.00);
+
+
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(1,'Reginaldo', '@regisLin','123456','Consultor de vendas','M');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(2,'Julliete','@SilvaJu','6544321','Auxiliar de vendas','F');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(3,'Andressa','@Dramessa','76723*hjdh','Gerente de vendas','F');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(4,'Olga','@olga123','ffuuu569','Gestor de Marketing e vendas','F');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(5,'Alexandry','@Alex76','c653356f4','Supervisor de vendas','M');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(6,'Márcia','@marciafi9','6235372hv','Coordenador de vendas','F');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(7,'Paulo Afonso','@pauloafn','43534kfd#','Consultor de vendas','M');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(8,'Ana Tolledo','@Aninha','123345iur','Consultor de vendas','F');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(9,'Maria Antonieta','@Mariaana','3243dfd*7','Consultor de vendas','F');
+insert into usuario (idusuario,nomeusuario,login,senha,cargo,sexo)
+				values(10,'Carlos Magno','@carlosM','20202jdsj','Suporte a vendas','M');
+				
+				
+				
+insert into Marca(idMarca,nomemarca)
+				values(1,'Natura');
+insert into Marca(idMarca,nomemarca)
+				values(2,'Gucci');
+insert into Marca(idMarca,nomemarca)
+				values(3,'O Boticário');
+insert into Marca(idMarca,nomemarca)
+				values(4,'Mercedes Benz');
+insert into Marca(idMarca,nomemarca)
+				values(5,'Jequiti');
+insert into Marca(idMarca,nomemarca)
+				values(6,'Avon');
+insert into Marca(idMarca,nomemarca)
+				values(7,'Ferrari');
+insert into Marca(idMarca,nomemarca)
+				values(8,'Ana Hickmann');
+insert into Marca(idMarca,nomemarca)
+				values(9,'Invictus');
+insert into Marca(IdMarca,nomemarca)
+		        values(10,'Armani Code');	
+insert into Marca(idMarca,nomemarca)
+				values(11,'Granado');
+insert into Marca(idMarca,nomemarca)
+				values(12,'Johnson Baby');
+insert into Marca(idMarca,nomemarca)
+				values(13,'Giovanna Baby');
+				
+insert into categoria(idcategoria,nome_categoria)
+				values(1,'Parfum');
+insert into categoria(idcategoria,nome_categoria)
+				values(2,'Eau de Parfum');
+insert into categoria(idcategoria,nome_categoria)
+				values(3,'Eau de Toilette');
+insert into categoria(idcategoria,nome_categoria)
+				values(4,'Eau de Cologne');
+insert into categoria(idcategoria,nome_categoria)
+				values(5,'Perfumes Masculinos Importados');
+insert into categoria(idcategoria,nome_categoria)
+				values(6,'Perfumes Femininos Importados');
+insert into categoria(idcategoria,nome_categoria)
+				values(7,'Perfumes Masculinos Nacionais');
+insert into categoria(idcategoria,nome_categoria)
+				values(8,'Perfumes Femininos Nacionais');
+insert into categoria(idcategoria,nome_categoria)
+				values(9,'Perfumes Infantil');
+				
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(1,3,'Perfumes Importados',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(2,1,'Perfumes Nacionais',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(3,4,'Réplicas de Perfumes Importados',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(4,2,'Réplicas de Perfumes Nacionais',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(5,5,'Perfumes Importados',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(6,9,'Perfumes Importados',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(7,6,'Perfumes Importados',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(8,7,'Perfumes Nacionais',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(9,8,'Perfumes Nacionais',0);
+insert into Prateleira(idPrateleira,idcategoria,descricaoprateleira,quantidadefrascos)
+				values(10,9,'Perfumes Nacionais',0);
+
+				
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(10,'Kaiak Aventura',1,2);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(11,'Malbec Black',3,1);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(12,'Gucci Bloom Gucci',2,2);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(13,'Quasar',3,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(14,'Quasar Brave',3,1);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(15,'Quasar Fire',3,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(16,'Quasar Surf',3,2);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(17,'Quasar Evolution',3,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(18,'Intense Desodorante',3,1);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(19,'Coffee Man',3,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(20,'Floratta Amor de Lavanda',3,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(21,'Essencial Clássico',1,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(22,'Sintonia Noite',1,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(23,'Colônia Hoje',1,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(24,'Essencial Exclusivo',1,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(25,'Surreal Utopia',1,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(26,'Gucci Guilty',2,6);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(27,'Guilty Femme Gucci',2,6);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(28,'Gucci Guilty Intense Gucci',2,5);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(29,'Mercedes-Benz Select',4,3);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(30,'Mercedes-Benz Club black',4,5);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(31,'Mercedes-Benz Women',4,6);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(32,'Portiolli Titanium',5,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(33,'Luan Santana Vip',5,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(34,'Claudia Leitte',5,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(35,'Eliana Quartzo',5,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(36,'Pur Blanca Noite',6,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(37,'Mulher e Poesia Garota de Ipanema',6,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(38,'MUSK+ Intense',6,7);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(39,'Scuderia Ferarri Forte',7,5);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(40,'Scuderia Ferrari Red',7,5);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(41,'Britney Spears Fantasy',7,6);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(42,'Dream',8,8);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(43,'Invictus Paco Rabanne',9,5);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(44,'Lady Million Lucky',9,6);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(45,'Armani Code Homme',10,5);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(46,'Gerânio e Grapefruit',11,6);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(47,'Mamãe e Bebê',12,9);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(48,'Lavanda Johnson''s Baby',12,9);
+insert into produto(idproduto,nomedoproduto,idmarca,idcategoria)
+				values(49,'Giovanna Baby Classic',13,9);
+				
+				
+ 
+insert into Fornecedor(idFornecedor,razaosocial,nomefantasia,cnpj)
+				values(1,'TM COSMÉTICOS INDÚSTRIA E COMÉRCIO LTDA','Entrega de cosméticos','24.563.783/7423-65');
+insert into Fornecedor(idFornecedor,razaosocial,nomefantasia,cnpj)
+				values(2,'R,L importados','Perfumaria importada','52.324.543/5236-27');
+insert into Fornecedor(idFornecedor,razaosocial,nomefantasia,cnpj)
+				values(3,'REPRESENTANTE JOICO COSMÉTICOS PROFISSIONAI','Essenza perfumes','86.000.183/2643-66');
+
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(1,3,2,2000,'2021/01/28');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(2,2,1,1500,'2021/02/12');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(3,1,2,2300,'2021/03/04');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(4,3,2,3000,'2021/01/14');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(5,2,1,2500,'2020/12/16');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(6,5,3,2300,'2020/11/19');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(7,3,1,1800,'2020/11/29');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(8,6,3,2900,'2021/03/05');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(9,4,3,4700,'2020/12/27');
+insert into Entrada(idEntrada,idusuario,idfornecedor,valortotaldanota,datacompra)
+				values(10,3,2,2450,'2021/02/28');
+
+
+insert into itensentrada(iditensentrada,idEntrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(1,1,11,70,25,'Fr',1,3,2.50);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(2,3,12,80,20,'Fr',2,6,5);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(3,2,10,50,30,'Fr',2,4,2);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(4,9,20,100,30,'fr',2,3,3);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(5,4,34,120,30,'Fr',2,7,4);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(6,6,39,90,30,'Fr',3,8,5);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(7,9,28,105,40,'Fr',3,7,4);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(8,8,27,87,45,'Fr',3,4,2);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(9,4,19,92,30,'Fr',2,5,4);
+insert into itensentrada(iditensentrada,identrada,idproduto,precocompra,quantidadeitensentrada,unidade,ipi,frete_itensentrada,icms)
+					values(10,10,14,560,25,'Qx',6,19,10);
+					
+					
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(1,2,3,'2021/02/28',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(2,1,2,'2020/04/04',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(3,2,1,'2021/01/23',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(4,7,3,'2020/11/25',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(5,9,1,'2020/12/20',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(6,5,5,'2020/03/28',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(7,7,3,'2021/01/05',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(8,10,2,'2021/02/20',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(9,1,2,'2021/02/15',0);
+insert into Venda(idVenda,idusuario,idcliente,datavenda,valortotal)
+				values(10,6,7,'2021/02/20',0);
+
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(1,2,10,5,500,10);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(2,3,12,10,900,5);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(3,1,11,7,1200,20);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(4,5,20,5,151.20,6);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(5,9,34,2,186.20,10);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(6,5,39,4,148.40,10);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(7,4,28,3,166.60,10);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(8,6,27,2,134.40,10);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(9,8,19,5,144.20,10);
+insert into itens_vendas(iditensvendas,idvenda,idproduto,quantidade,valorvenda,desconto)
+				values(10,10,14,8,833,100);
+				
+update produto set quantidade= 30 where idproduto=10;
+update produto set quantidade= 50 where idproduto=11;
+update produto set quantidade= 40 where idproduto=12;
+update produto set quantidade= 40 where idproduto=14;
+update produto set quantidade= 35 where idproduto=19;
+update produto set quantidade= 50 where idproduto=20;
+update produto set quantidade= 25 where idproduto=27;
+update produto set quantidade= 20 where idproduto=28;
+update produto set quantidade= 36 where idproduto=34;
+update produto set quantidade= 40 where idproduto=39;
+				
+				
+
+				
